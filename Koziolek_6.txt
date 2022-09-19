@@ -1,0 +1,104 @@
+from __future__ import print_function
+
+print("zadanie 6")
+print("protokol slepych podpisow cyfrowych bazujacych na DSA")
+
+def parametry():
+    #dlugosc liczb pierwszej (charakterystyki ciala) w bitach (b)
+    bp = 13
+
+    #generowanie liczb pierwszych o dlugosci bp
+    p = previous_prime(2^bp)
+    #duzy pierwszy dzielnik q liczby p - 1
+    divids_pminus1 = (p-1).prime_factors()
+    q = max(divids_pminus1)
+    #cialo Fp
+    FP = GF(p)
+    #generator g rzedu q
+    g = FP(randint(2, p -1))
+    while True:
+        if g.multiplicative_order() == q:
+            break
+        g = FP(randint(2, p -1))
+    print("g = ", g, "-> rzad q = ", q)
+    #uzytkownik B posiada pare kluczy private/public x i y=g^x
+    #cialo Fq
+    Fq =GF(q)
+    #prywatny
+    x = randint(2, q-1)
+    #publiczny y
+    y = FP(g^x)
+    return g, x, y, p, q
+
+#kroki protokolu
+def protocol(g, x, y, p, q):
+    FP = GF(p)
+    FQ = GF(q)
+    #wiadomosc do podpisu m spelniajaca waariunek nwd(m,q)
+    m = randint(2, p-1)
+    while not gcd(m , q) == 1:
+        m = randint(2, p-1)
+    #podpisujacy B wybiera losowo k
+    k = randint(2, p-1)
+    #B oblicza R tak aby bylo wzglednie pierwsze z q
+    R = FP(g^k)
+    while not gcd(R, q) == 1:
+        k = randint(2, p-1)
+        R = FP(g^k)
+    #A wybiera losowo a i b
+    a = randint(2, q-1)
+    b = randint(2, q-1)
+    # A oblicza R1
+    sk1 = FP(R^a)
+    sk2 = FP(g^b)
+    R1 = FP(sk1 * sk2)
+    #A sprawdza nwd(R1, q) == 1
+    while not gcd(R1, q) == 1:
+        a = randint(2, q-1)
+        b = randint(2, q-1)
+        sk1 = FP(R^a)
+        sk2 = FP(g^b)
+        R1 = FP(sk1 * sk2)
+    #oblicza m prim
+    am = FQ(a*m)
+    R = FQ(R)
+    amR = FQ(am*R)
+    R1 = FQ(R1)
+    R1_inv = FQ(R1^(-1))
+    m_prim = FQ(amR*R1_inv)
+    #B wyznacza podpis
+    R = FQ(R)
+    s1 = FQ(R*x)
+    s2 = FQ(k*m_prim)
+    s_prim = FQ(s1+s2)
+    #   A usuwa zaciemnienie
+    R = FQ(R)
+    R_inv = FQ(R ^(-1))
+    R_inv = FQ(R_inv)
+    Rs = FQ(R_inv * s_prim)
+    R1 = FQ(R1)
+    Rs = FQ(Rs * R1)
+    bm = FQ(b*m)
+    s = FQ(Rs + bm)
+    #Dodatkowo oblicza
+    r = FQ(R1)
+    #tutaj nowe
+    #Weryfikacja podpisu
+    #T = G(((g^s)*(y^(-r1)))^(m^(-1)))
+    m = FQ(m)
+    m_inv = FQ(m^(-1))
+    gs = FP(g^s)
+    y_inv = FP(y^(-1))
+    yr = FP(y_inv^r)
+    T = FP(gs * yr)
+    T = FP(T ^ m_inv)
+    T = FQ(T)
+    if r == T:
+        print("Podpis jest poprawny")
+    else:
+        print("Podpis jest niepoprawny")
+
+def main():
+    g, x, y, p, q = parametry()
+    protocol(g, x, y, p, q)
+main()

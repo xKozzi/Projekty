@@ -1,0 +1,60 @@
+from __future__ import print_function
+
+print("zadanie 5")
+print("liczby calkowite Bluma")
+
+def parametry():
+    #dlugosc liczb pierwszych w bitach (b)
+    bp = 11
+
+    bq = 19
+
+    #generowanie liczb pierwszych o dlugosciach, odpowiednio bp i bq
+    p = previous_prime(2^bp)
+    while not p % 4 == 3:
+        p = previous_prime(2^bp)
+
+    q = previous_prime(2^bq)
+    while not q % 4 == 3:
+        q = previous_prime(2^bq)
+    # liczba Bluma
+    n = p*q
+    print("N = ", p, " ^ ", q, " = ", n)
+    return p, q, n
+# kazda reszta kwadratowa modulo n ma dokladnie cztery pierwiastki kwadratowe
+def protokol(p, q, n):
+    #losowanie x wzglednie pierwszego z n
+    x = randint(2, n - 1)
+    while not gcd(x, n) == 1:
+        x = randint(2, n - 1)
+
+    #A oblicza x0 i x1
+    x0 = x^2 % n
+    x1 = x0^2 % n
+
+    #B odgaduje czy x0 jest parzyste czy nieparzyste
+
+    flaga = 0
+    flaga = randint(0,1)
+    if flaga == 0:
+        print ("Uzytkownik B: x0 jest parzyste")
+    else:
+        print ("Uzytkownik B: x0 jest nieparzyste")
+    N = p * q
+    #B sprawdza czy n jest liczba calkowita Bluma
+    if N == n:
+        if x^2 % n == x0 and x1 == x0^2 % n:
+            if x0%2 == 0:
+                if flaga == 0:
+                    print("orzel")
+                else:
+                    print("reszka")
+            else:
+                if flaga == 1:
+                    print("orzel")
+                else:
+                    print("reszka")
+def main():
+    p ,q, n = parametry()
+    protokol(p, q, n)
+main()

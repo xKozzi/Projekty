@@ -1,0 +1,43 @@
+from __future__ import print_function
+
+import hashlib
+import hmac
+import binascii
+import random
+
+
+print("Zadanie 2b")
+print("Protokol lamporta")
+
+#generacja skrotu z liczby calkowitej a
+#d = hashlib.sha512()
+#liczba pocz¹tkowa x0 (tajemnica)
+x0 = "3452"
+
+#liczba iteracji n -> parametr wejsciowy
+n = 12
+
+#protokol
+xi = []
+fx = []
+sk = x0
+fx.append(sk)
+#kolejne warosc x_k powstaja jako wynik dzialania funkcji skrotu z argumentem x_k-1
+for i in range(0, n):
+    sk = hashlib.sha256(fx[i]).hexdigest()
+    fx.append(sk)
+# przy pierwszym logowaniu wartosc:
+# result to identyfikator uzytkownika
+# password to haslo
+result = fx[n]
+password = fx[n - 1]
+print("Identyfikator podany przez uzytkownika: ", result )
+secret = hashlib.sha256(password).hexdigest()
+print("")
+print("Haslo podane przez uzytkownika: ", password )
+print("Zweryfikowany identyfikator: ", secret)
+
+if secret == result:
+    print("Haslo poprawne")
+else:
+    print("Haslo nie poprawne")

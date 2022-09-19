@@ -1,0 +1,46 @@
+from __future__ import print_function
+
+def parametry():
+    #dlugosc p ciala Fp w bitach (l)
+    l = 13
+    #ile razy interacja
+    t = 11
+
+    #liczba pierwsza p
+    p = previous_prime(2^l)
+    #cialo Fp
+    FP = GF(p)
+    return p, t
+def protocol(p , t):
+    FP = GF(p)
+    #losowe a i  losowe x wzgledne  z p - 1
+    a = FP.random_element()
+    x = FP.random_element()
+    while not gcd(x, p - 1) == 1:
+        x = FP.random_element()
+    #logarytm dyskretny w ciele
+    b = FP(a^x)
+
+    for i in range(0 , t):
+        # r mniejsze od p -1
+        r = randint(2, p-1)
+        #A oblicza h
+        h = a^r
+        # losowy bit 
+        bit_k = randint(0, 1)
+        #uzytkoniwk A oblicza s mod (p-1)
+        RP = IntegerModRing(p-1)
+        s = RP(r + bit_k * x)
+        #uzytkownik B potwierdza
+        flaga1 = FP(a^s)
+        flaga2 = FP(h * b^bit_k)
+        #sprawdzenie
+        if flaga1 == flaga2:
+            print ("PRAWDA")
+            break
+
+def main():
+    p, t = parametry()
+    protocol(p, t)
+
+main()

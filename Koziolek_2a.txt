@@ -1,0 +1,84 @@
+from __future__ import print_function
+import random
+import hashlib
+import hmac
+import binascii
+
+
+#1. Zaimplementowaæ w œrodowisku sagemath protokó³ SKID3
+#Protokó³ wykorzystuje funkcjê MAC (HMAC) 
+print("Protokó³ SKID3")
+
+#wybierz dlugosc w bitach losowanych liczb a i b
+t = 10
+userA = "PiotrA"
+print("U¿ytkownik A to :",userA)
+userB = "WiktorB"
+print("U¿ytkownik B to :",userB)
+
+#U¿ytkownicy A i B korzystaj¹ wspólnie z tego samego klucza tajnego K
+#Deklaruje klucz tajny dla uzytkownika A i B
+key = "171654"
+#Zwraca dane binarne reprezentowane przez ci¹g szesnastkowy szesnastkowy
+key_h = binascii.unhexlify(key)
+#KROK1
+#U¿ytkownik A wybiera liczbê losow¹ RandA:
+a = randint(1,2**t)
+print("A:",a)
+
+#KROK2
+#U¿ytkownik B wybiera liczbê losow¹ RandB:
+b = randint(1,2**t)
+print("B:",b)
+
+#U¿ytkownik B oblicza HMACK(RandA,RandB,B)
+
+def B(key_h, userB, a, b):
+    hB= hmac.new(key_h , str(a).encode(), hashlib.sha512)
+    hB.update(str(b).encode() + str(userB).encode())
+    hB = hB.hexdigest()
+    print("Klucz dla B: ")
+    print("",hB)
+    return hB
+
+#krok 3
+#U¿ytkownik A oblicza HMACK(RandA,RandB,B)
+
+def A(key_h, userA, hB,  a , b):
+    hAB= hmac.new(key_h, str(a).encode(), hashlib.sha512)
+    hAB.update(str(b).encode() + str(userB).encode())
+    hAB = hAB.hexdigest()
+    print("Klucz dla A: ")
+    print("",hAB)
+    if hAB == hB:
+        print("Po³¹czone z :",userB)
+        hA= hmac.new(key_h, str(b).encode(), hashlib.sha512)
+        hA.update(str(userA).encode())
+        hA = hA.hexdigest()
+        print("Hash wyslany do B")
+        print("",hA)
+    return hA
+
+#Porównuje wynik z wartoœci¹ otrzyman¹ od A, jeœli wartoœci s¹ identyczne
+#u¿ytkownik B ma pewnoœæ, ¿e komunikuje siê z A.
+#Krok4
+def vrfy(userA, hA, b):
+        hBA= hmac.new(key_h, str(b).encode(),hashlib.sha512)
+        hBA.update(str(userA).encode())
+        hBA = hBA.hexdigest()
+        print("Hash policzony dla B")
+        print("",hBA)
+        print("Hash wys³any do B")
+        print("",hA)
+        if hBA == hA:
+            print("Po³¹czone z :",userA)
+
+
+#funkcja main realizujaca kroki zadania
+#wywo³anie funkcji veryfikacja
+def main():
+    fb = B(key_h,userB, a, b)
+    fa = A(key_h,userA, fb, a, b)
+    vrfy(userA, fa, b)
+
+main()
